@@ -21,4 +21,4 @@ The heart of the HSM is Stefan heinzmann's HSM. This HSM has been modernized and
 - Allow custom template folder
 
 # Limitations
-YAHMSG currently does not support features like History/Fork/Concurrent/<<choice>>/Stereotyes/Point/Pin/Expansion features provided by plantuml. Any plantuml markup is also not supported. Some of these might be solved in later versions.
+YAHMSG currently does not support features like `History`/`Fork`/`Concurrent`/`<<choice>>`/`Stereotyes`/`Point`/`Pin`/`Expansion` features provided by plantuml. Any plantuml markup is also not supported. Some of these might be solved in later versions.
