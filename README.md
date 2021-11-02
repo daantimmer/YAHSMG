@@ -17,6 +17,8 @@ The heart of the HSM is Stefan heinzmann's HSM. This HSM has been modernized and
 - Plantuml supports generating images from any file, not only plantuml-specific files. For example you can have your plantuml diagram written in a source's header file. The diagram finder logic will now only search for `.puml` files, but a near future improvement will give the user the possibility to specify what extensions to look for.
 - Create example implementations
 - Create C++ unit test
+- Allow specifying which templates to use
+- Allow custom template folder
 
 # Limitations
 YAHMSG currently does not support features like History/Fork/Concurrent/<<choice>>/Stereotyes/Point/Pin/Expansion features provided by plantuml. Any plantuml markup is also not supported. Some of these might be solved in later versions.
