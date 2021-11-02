@@ -1,0 +1,47 @@
+#ifndef {{ name|upper }}_HSM_HPP
+#define {{ name|upper }}_HSM_HPP
+
+#include "hsm/hsm.hpp"
+
+struct {{ name }}_HSM
+{
+    enum struct Signal
+    {
+{% for event in allEvents %}
+        {{ event }},
+{% endfor %}
+        Max
+    };
+
+    {{ name }}_HSM() = default;
+    ~{{ name }}_HSM() = default;
+
+    void init();
+
+    void next(const TopState<{{ name }}_HSM>& state);
+
+    Signal getSig() const;
+    const char* getState() const;
+
+    void dispatch(Signal signal);
+
+{% if allConditions %}
+    // Conditions
+{% for condition in allConditions %}
+    virtual bool {{ condition }}() const = 0;
+{% endfor %}
+{% endif %}
+
+{% if allActions %}
+    // Actions
+{% for action in allActions %}
+    virtual void {{ action }}() = 0;
+{% endfor %}
+{% endif %}
+
+private:
+    const TopState<{{ name }}_HSM>* state{nullptr};
+    Signal signal{Signal::Max};
+};
+
+#endif /* {{ name|upper }}_HSM_HPP */

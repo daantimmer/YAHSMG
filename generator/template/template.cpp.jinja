@@ -1,0 +1,135 @@
+#include "{{ name }}_HSM.hpp"
+
+// start typedefs
+using Top = CompState<{{ name }}_HSM, 0>;
+
+{% for depth_key in depth.keys() %}
+{% for depth_value in depth[depth_key] %}
+{% if state_parents[depth_value] %}
+
+{% if is_leaf_state[depth_value] %}
+using {{ depth_value }} = LeafState<{{ name }}_HSM, {{ loop.index }}, {{ state_parents[depth_value] }}>;
+{% else %}
+using {{ depth_value }} = CompState<{{ name }}_HSM, {{ loop.index }}, {{ state_parents[depth_value] }}>;
+{% endif %}
+
+{% else %}
+
+{% if is_leaf_state[depth_value] %}
+using {{ depth_value }} = LeafState<{{ name }}_HSM, {{ loop.index }}, Top>;
+{% else %}
+using {{ depth_value }} = CompState<{{ name }}_HSM, {{ loop.index }}, Top>;
+{% endif %}
+
+{% endif %}
+
+{% endfor %}
+{% endfor %}
+// end typedefs
+
+// start inits
+{% for init_key, init_value in inits.items() %}
+template<>
+{% if init_key %}
+inline void {{ init_key }}::init({{ name }}_HSM& h){
+{% else %}
+inline void Top::init({{ name }}_HSM& h){
+{% endif %}
+    Init<{{ init_value }}> initObj{h};
+}
+
+{% endfor %}
+// end inits
+
+
+// start getState
+{% for class_name, is_leaf in is_leaf_state.items() %}
+{% if is_leaf %}
+template<>
+const char* {{ class_name }}::getState() const { return "{{ class_name }}"; }
+{% endif %}
+{% endfor %}
+// end getState
+
+void {{ name }}_HSM::init()
+{
+    Top::init(*this);
+}
+
+void {{ name }}_HSM::next(const TopState<{{ name }}_HSM>& state)
+{
+    this->state = &state;
+}
+
+{{ name }}_HSM::Signal {{ name }}_HSM::getSig() const
+{
+    return signal;
+}
+
+const char* {{ name }}_HSM::getState() const
+{
+    return state->getState();
+}
+
+void {{ name }}_HSM::dispatch(Signal signal)
+{
+    this->signal = signal;
+    state->handler(*this);
+}
+
+// start events
+{% for key, value in events.items() %}
+template<>
+template<class X>
+inline void {{ key }}::handle({{ name }}_HSM& h, const X& x) const{
+    switch(h.getSig()){
+{% for eventData in value %}
+        case {{ name }}_HSM::Signal::{{ eventData["event"] }}:
+{% if eventData["condition"] %}
+            if (h.{{ eventData["condition"] }}())
+{% endif %}
+            {
+{% if eventData["target"] %}
+                Tran<X, This, {{ eventData["target"] }}> tranObj{h{% if eventData["action"] %}, &{{ name }}_HSM::{{ eventData["action"] }}{% endif %}};
+{% else %}
+{% if eventData["action"] %}
+                {{ eventData["action"] }}();
+{% endif %}
+{% endif %}
+                return;
+            }
+            break;
+
+{% endfor %}
+        default:
+            break;
+    }
+    Base::handle(h, x);
+}
+
+{% endfor %}
+// end events
+
+// start entry
+{% for key, values in state_actions["entry"].items() %}
+template<>
+inline void {{ key }}::entry({{ name }}_HSM& h) {
+{% for value in values %}
+    h.{{ value }}();
+{% endfor %}
+}
+
+{% endfor %}
+// end entry
+
+// start exit
+{% for key, values in state_actions["exit"].items() %}
+template<>
+inline void {{ key }}::exit({{ name }}_HSM& h) {
+{% for value in values %}
+    h.{{ value }}();
+{% endfor %}
+}
+
+{% endfor %}
+// end exit
