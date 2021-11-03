@@ -93,7 +93,7 @@ inline void {{ key }}::handle({{ name }}_HSM& h, const X& x) const{
                 Tran<X, This, {{ eventData["target"] }}> tranObj{h{% if eventData["action"] %}, &{{ name }}_HSM::{{ eventData["action"] }}{% endif %}};
 {% else %}
 {% if eventData["action"] %}
-                {{ eventData["action"] }}();
+                h.{{ eventData["action"] }}();
 {% endif %}
 {% endif %}
                 return;
